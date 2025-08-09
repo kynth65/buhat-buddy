@@ -40,9 +40,16 @@ class WeeklyPlanController extends Controller
         ]);
         $user = Auth::user();
 
+        // Only update workout_text if it was provided in the request payload.
+        // This prevents accidental overwriting (e.g., when ensuring a plan exists).
+        $values = [];
+        if (array_key_exists('workout_text', $validated)) {
+            $values['workout_text'] = $validated['workout_text'] ?? null;
+        }
+
         $plan = WeeklyPlan::updateOrCreate(
             ['user_id' => $user->id, 'day_of_week' => $validated['day_of_week']],
-            ['workout_text' => $validated['workout_text'] ?? null]
+            $values
         );
 
         return response()->json(['plan' => $plan]);

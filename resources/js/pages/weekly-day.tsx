@@ -34,6 +34,7 @@ export default function WeeklyDay() {
     const [form, setForm] = useState({ exercise_name: '', estimated_reps: '', sets: '', notes: '' });
     const [templateFilter, setTemplateFilter] = useState({ category: 'push', equipment: 'bodyweight' });
     const [templates, setTemplates] = useState<any[]>([]);
+    const [label, setLabel] = useState('');
 
     const csrf = useMemo(() => {
         const el = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null;
@@ -45,10 +46,12 @@ export default function WeeklyDay() {
         const res = await fetch('/weekly-plan', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest' },
-            body: JSON.stringify({ day_of_week: day, workout_text: '' }),
+            // Do NOT send workout_text here to avoid clearing an existing label
+            body: JSON.stringify({ day_of_week: day }),
         });
         const data = await res.json();
         setPlanId(data.plan.id);
+        setLabel(data.plan.workout_text ?? '');
         return data.plan.id as number;
     }
 
@@ -87,6 +90,16 @@ export default function WeeklyDay() {
         await loadItems(planId);
     }
 
+    async function saveLabel(newLabel: string) {
+        if (!planId) return;
+        setLabel(newLabel);
+        await fetch('/weekly-plan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify({ day_of_week: day, workout_text: newLabel || null }),
+        });
+    }
+
     async function addItem() {
         if (!planId) return;
         const payload = {
@@ -118,16 +131,25 @@ export default function WeeklyDay() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Weekly Plan • ${day}`} />
-            <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
-                <div className="rounded-xl border bg-gradient-to-r from-green-500/15 via-emerald-500/10 to-cyan-500/15 p-6 dark:from-green-400/10 dark:via-emerald-400/5 dark:to-cyan-400/10">
-                    <div className="flex items-center justify-between gap-3">
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-3 sm:gap-6 sm:p-4">
+                <div className="rounded-xl border bg-primary/5 p-4 sm:p-6">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-center gap-3">
-                            <Dumbbell className="size-6 text-emerald-600 dark:text-emerald-400" />
-                            <h1 className="text-xl font-semibold">{day} Plan</h1>
+                            <Dumbbell className="size-6 text-primary" />
+                            <h1 className="text-xl font-semibold text-foreground">{day} Plan</h1>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Input
+                                value={label}
+                                onChange={(e) => setLabel(e.target.value)}
+                                onBlur={(e) => saveLabel(e.target.value)}
+                                placeholder="Add a label (e.g., chest day)"
+                                className="w-full sm:w-64"
+                            />
                         </div>
                         <Dialog open={open} onOpenChange={setOpen}>
                             <DialogTrigger asChild>
-                                <Button variant="default" className="gap-2">
+                                <Button variant="default" className="gap-2 bg-primary text-primary-foreground hover:opacity-90">
                                     <Plus className="size-4" /> Add Exercise
                                 </Button>
                             </DialogTrigger>
@@ -188,7 +210,7 @@ export default function WeeklyDay() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Dumbbell className="size-5 text-emerald-600" /> Exercises
+                            <Dumbbell className="size-5 text-primary" /> Exercises
                         </CardTitle>
                         <CardDescription className="flex flex-col gap-3">
                             <span>Add and manage exercises for {day}</span>

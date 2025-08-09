@@ -71,6 +71,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Profile stats JSON for frontend consumption
     Route::get('/api/profile', [ProfileStatsController::class, 'show']);
+    Route::get('/api/profile/stats', [ProfileStatsController::class, 'stats']);
 });
 
 require __DIR__ . '/settings.php';

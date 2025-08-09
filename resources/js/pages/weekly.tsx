@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+// removed per-day inline Input; label is edited on the day page
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
@@ -45,11 +45,11 @@ export default function Weekly() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Weekly Plan" />
-            <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
-                <div className="rounded-xl border bg-gradient-to-r from-green-500/15 via-emerald-500/10 to-cyan-500/15 p-6 dark:from-green-400/10 dark:via-emerald-400/5 dark:to-cyan-400/10">
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-3 sm:gap-6 sm:p-4">
+                <div className="rounded-xl border bg-primary/5 p-4 sm:p-6">
                     <div className="flex items-center gap-3">
-                        <Dumbbell className="size-6 text-emerald-600 dark:text-emerald-400" />
-                        <h1 className="text-xl font-semibold">Weekly Routine</h1>
+                        <Dumbbell className="size-6 text-primary" />
+                        <h1 className="text-xl font-semibold text-foreground">Weekly Routine</h1>
                     </div>
                 </div>
 
@@ -61,7 +61,7 @@ export default function Weekly() {
                         <CardDescription>Edit your plan for each weekday</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
                                 <div
                                     key={day}
@@ -69,20 +69,14 @@ export default function Weekly() {
                                     onClick={() => router.visit(`/weekly/${day}`)}
                                 >
                                     <div className="mb-2 flex items-center justify-between">
-                                        <div className="font-medium">{day}</div>
+                                        <div className="font-medium text-foreground">{day}</div>
                                         {weeklyPlans[day] ? (
-                                            <Badge className="bg-emerald-600 text-white dark:bg-emerald-500">Planned</Badge>
+                                            <Badge className="bg-primary text-primary-foreground">Planned</Badge>
                                         ) : (
-                                            <Badge variant="outline">Empty</Badge>
+                                            <Badge className="bg-secondary text-secondary-foreground">Empty</Badge>
                                         )}
                                     </div>
-                                    <Input
-                                        value={weeklyPlans[day] || ''}
-                                        placeholder="e.g., leg day"
-                                        onChange={(e) => setWeeklyPlans((prev) => ({ ...prev, [day]: e.target.value }))}
-                                        onBlur={(e) => upsertPlan(day, e.target.value)}
-                                        onClick={(e) => e.stopPropagation()}
-                                    />
+                                    <div className="text-sm text-muted-foreground">{weeklyPlans[day] ? weeklyPlans[day] : 'No label yet'}</div>
                                 </div>
                             ))}
                         </div>

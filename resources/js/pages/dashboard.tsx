@@ -130,13 +130,13 @@ export default function Dashboard() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Buhat-Buddy" />
-            <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-3 sm:gap-6 sm:p-4">
                 {/* Hero / Sports banner */}
-                <div className="rounded-xl border bg-gradient-to-r from-green-500/15 via-emerald-500/10 to-cyan-500/15 p-6 dark:from-green-400/10 dark:via-emerald-400/5 dark:to-cyan-400/10">
+                <div className="rounded-xl border bg-primary/5 p-4 sm:p-6">
                     <div className="flex items-center gap-3">
-                        <Dumbbell className="size-6 text-emerald-600 dark:text-emerald-400" />
-                        <h1 className="text-xl font-semibold">Buhat-Buddy</h1>
-                        <Badge className="bg-emerald-600 text-white dark:bg-emerald-500">Train. Log. Level Up.</Badge>
+                        <Dumbbell className="size-6 text-primary" />
+                        <h1 className="text-xl font-semibold text-foreground">Buhat-Buddy</h1>
+                        <Badge className="bg-primary text-primary-foreground">Train. Log. Level Up.</Badge>
                     </div>
                 </div>
 
@@ -145,7 +145,7 @@ export default function Dashboard() {
                     <Card className="md:col-span-3" id="calendar">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <CalendarDays className="size-5 text-emerald-600" /> Training Calendar
+                                <CalendarDays className="size-5 text-primary" /> Training Calendar
                             </CardTitle>
                             <CardDescription>Log workouts or rest days. Leg day gives bonus XP.</CardDescription>
                         </CardHeader>
@@ -185,10 +185,10 @@ export default function Dashboard() {
                                             className={[
                                                 'aspect-square rounded-lg border text-sm transition-colors',
                                                 selected
-                                                    ? 'border-emerald-600 ring-2 ring-emerald-600/40'
+                                                    ? 'border-primary ring-2 ring-primary/40'
                                                     : 'border-sidebar-border/70 dark:border-sidebar-border',
-                                                isWorkout ? 'bg-emerald-600/15 text-emerald-800 dark:text-emerald-300' : '',
-                                                isRest ? 'bg-neutral-500/10 text-neutral-600 dark:text-neutral-300' : '',
+                                                isWorkout ? 'bg-primary/15 text-primary' : '',
+                                                isRest ? 'bg-[#222831]/10 text-[#222831] dark:text-[#f2f2f2]' : '',
                                             ].join(' ')}
                                         >
                                             <div className="flex h-full flex-col items-center justify-center">
@@ -206,14 +206,14 @@ export default function Dashboard() {
                                     const name = weekdayName(new Date(selectedDate).getDay());
                                     if (mark) {
                                         if (mark.is_rest_day) return 'Selected: Rest day';
-                                        return `Selected: ${mark.workout_text || weeklyPlans[name] || 'Workout'}`;
+                                        return `Selected: ${mark.workout_text || 'Workout'}`;
                                     }
                                     return `Selected: ${weeklyPlans[name] || '—'}`;
                                 })()}
                             </div>
 
                             <div className="mt-4 flex flex-wrap items-center gap-2">
-                                <Button onClick={() => submitCheckIn(false)} className="bg-emerald-600 text-white hover:bg-emerald-600/90">
+                                <Button onClick={() => submitCheckIn(false)} className="bg-primary text-primary-foreground hover:bg-[#e06100]">
                                     Workout
                                 </Button>
                                 <Button variant="outline" onClick={() => submitCheckIn(true)}>
@@ -243,7 +243,7 @@ export default function Dashboard() {
                                             {l.is_rest_day ? (
                                                 <span className="text-muted-foreground">Rest day</span>
                                             ) : (
-                                                <span>{l.workout_text || weeklyPlans[weekdayName(new Date(l.date).getDay())] || 'Workout'}</span>
+                                                <span>{l.workout_text || 'Workout'}</span>
                                             )}
                                         </div>
                                     </div>
