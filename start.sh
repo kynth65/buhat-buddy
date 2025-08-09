@@ -7,6 +7,9 @@ echo "=== Starting Buhat-Buddy Application ==="
 PORT=${PORT:-8000}
 echo "Using port: $PORT"
 
+echo "APP_ENV: ${APP_ENV:-production}"
+echo "APP_URL: ${APP_URL:-not-set}"
+
 # Database configuration for production
 echo "=== Database Configuration ==="
 echo "DB_CONNECTION: ${DB_CONNECTION:-pgsql}"
@@ -35,6 +38,13 @@ for i in {1..30}; do
     echo "Attempt $i: Database not ready, waiting 2 seconds..."
     sleep 2
 done
+
+# Clear and warm caches with current env
+php artisan config:clear || true
+php artisan route:clear || true
+php artisan view:clear || true
+php artisan cache:clear || true
+php artisan config:cache || true
 
 # Run migrations
 echo "Running database migrations..."
