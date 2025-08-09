@@ -1,0 +1,193 @@
+Alright — here’s the **full implementation-ready documentation** for **Buhat-Buddy**, including your refined requirements, a **flow diagram**, and a **proposed database schema**.
+
+---
+
+# **Buhat-Buddy – Functional Requirements & Technical Specification**
+
+## **1. Overview**
+
+Buhat-Buddy is a gamified workout tracker that lets users log workouts/rest days, customize weekly workout plans, and earn XP-based levels/titles.
+The system centers around a **calendar view**, **weekly workout list**, and **profile stats** with XP progression.
+
+---
+
+## **2. Core Functionalities**
+
+### **2.1 Calendar Tracker**
+
+**Purpose:** Log workout/rest days and visualize progress.
+**User Actions:**
+
+* **Check-In** → Marks the day as a workout day and awards XP.
+* **Rest Day** → Marks the day as rest (does not break streak, no XP).
+* Calendar displays:
+
+  * Workout days (highlighted).
+  * Rest days (different color).
+  * Skipped days (unmarked).
+
+**Logic:**
+
+* Workout = **+10 XP**.
+* Leg day workout = **+10 XP** + **bonus 5 XP**.
+* Rest day = 0 XP.
+
+---
+
+### **2.2 Weekly Workout Plan**
+
+**Purpose:** Customizable plan for each weekday.
+**Features:**
+
+* User edits workouts via free-text input (e.g., `"arms-chest"`, `"leg day"`).
+* No restrictions on workout names.
+* Updates can be made at any time.
+
+---
+
+### **2.3 User Profile & Stats**
+
+**Purpose:** Show gamified progress & history.
+**Profile Displays:**
+
+* **Level** (calculated: 1 level per 100 XP).
+* **Title** (changes based on level milestones).
+* **Most Active Day** (weekday with highest logged workouts).
+* **Workout History**: Total workouts, rest days, streaks.
+
+**Title Milestones (example mapping):**
+
+| Level Range | Title    |
+| ----------- | -------- |
+| 1–5         | Novice   |
+| 6–10        | Expert   |
+| 11+         | God Mode |
+
+---
+
+### **2.4 XP System**
+
+* **Workout Day** = +10 XP
+* **Leg Day** = +15 XP (10 XP base + 5 XP bonus)
+* Level Up: **Every 100 XP**
+* Titles assigned dynamically based on level.
+
+---
+
+## **3. Technical Specification**
+
+### **3.1 Data Models**
+
+#### **User**
+
+| Field             | Type         | Notes              |
+| ----------------- | ------------ | ------------------ |
+| id                | int (PK)     |                    |
+| name              | string       |                    |
+| profile\_image    | string (URL) | optional           |
+| xp                | int          | default 0          |
+| level             | int          | calculated from xp |
+| title             | string       | based on level     |
+| most\_active\_day | string       | calculated         |
+
+#### **WorkoutLog**
+
+| Field         | Type     | Notes                |
+| ------------- | -------- | -------------------- |
+| id            | int (PK) |                      |
+| user\_id      | int (FK) | links to User        |
+| date          | date     | workout date         |
+| workout\_text | string   | free text            |
+| is\_rest\_day | boolean  | default false        |
+| xp\_gained    | int      | XP from that workout |
+
+#### **WeeklyPlan**
+
+| Field         | Type     | Notes          |
+| ------------- | -------- | -------------- |
+| id            | int (PK) |                |
+| user\_id      | int (FK) | links to User  |
+| day\_of\_week | string   | e.g., "Monday" |
+| workout\_text | string   | free text      |
+
+---
+
+### **3.2 Core Logic**
+
+**XP Calculation:**
+
+```
+if is_rest_day:
+    xp = 0
+else:
+    xp = 10
+    if "leg day" in workout_text.lower():
+        xp += 5
+```
+
+**Level Calculation:**
+
+```
+level = floor(xp / 100) + 1
+```
+
+**Most Active Day Calculation:**
+
+```
+group workout logs by weekday
+find the weekday with the highest count
+```
+
+---
+
+## **4. Flow Diagram**
+
+```
+[User Opens App]
+       |
+       v
+[Calendar View] ----> [Click Day] ----> [Choose: Check-In / Rest Day]
+       |                                      |
+       |                                      v
+       |                              [Log Workout in DB]
+       |                                      |
+       v                                      v
+[Weekly Plan View] <-- [Edit Plan]      [Update XP, Level, Stats]
+       |
+       v
+[Profile Stats] <--- [Fetch Data: XP, Level, Titles, Most Active Day]
+```
+
+---
+
+## **5. Example API Endpoints**
+
+* **POST** `/check-in`
+  Body: `{ date, workout_text, is_rest_day }`
+  Action: Logs workout, calculates XP, updates profile.
+
+* **GET** `/calendar`
+  Returns marked workout/rest days for the month.
+
+* **GET** `/weekly-plan`
+  Returns user’s weekly workout schedule.
+
+* **PUT** `/weekly-plan/:id`
+  Updates workout plan for a specific day.
+
+* **GET** `/profile`
+  Returns level, XP, title, and most active day.
+
+---
+
+## **6. UI Requirements**
+
+* **Calendar View:** Clickable days, workout/rest indicators.
+* **Weekly Plan Editor:** Editable text for each day.
+* **Profile View:** XP bar, level number, title badge, stats.
+* **Gamified Feedback:** Animation or popup when leveling up.
+
+---
+
+If you want, I can now **draw you a visual ERD (Entity Relationship Diagram)** so the AI/dev has a ready-to-use database structure. That would lock in the schema visually.
+Do you want me to add that next?
