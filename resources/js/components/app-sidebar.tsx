@@ -14,13 +14,13 @@ const mainNavItems: NavItem[] = [
         icon: Dumbbell,
     },
     {
-        title: 'Calendar',
-        href: '/dashboard#calendar',
+        title: 'Weekly',
+        href: '/weekly',
         icon: CalendarDays,
     },
     {
         title: 'Profile',
-        href: '/dashboard#profile',
+        href: '/profile',
         icon: Trophy,
     },
 ];

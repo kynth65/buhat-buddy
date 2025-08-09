@@ -16,15 +16,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
+    // Inertia pages
+    Route::get('/weekly', function () {
+        return Inertia::render('weekly');
+    })->name('weekly');
+
+    Route::get('/profile', function () {
+        return Inertia::render('profile');
+    })->name('profile');
+
     // API endpoints (could be moved to api.php if desired)
     Route::post('/check-in', [WorkoutLogController::class, 'checkIn']);
     Route::get('/calendar', [CalendarController::class, 'index']);
-    // History endpoint (month-scoped) can reuse calendar with workout_text, so no separate route for now
     Route::get('/weekly-plan', [WeeklyPlanController::class, 'index']);
     Route::put('/weekly-plan/{weeklyPlan}', [WeeklyPlanController::class, 'update']);
     Route::post('/weekly-plan', [WeeklyPlanController::class, 'upsert']);
-    Route::get('/profile', [ProfileStatsController::class, 'show']);
+
+    // Profile stats JSON for frontend consumption
+    Route::get('/api/profile', [ProfileStatsController::class, 'show']);
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

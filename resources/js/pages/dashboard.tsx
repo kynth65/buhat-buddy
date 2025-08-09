@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Dumbbell, CalendarDays, Trophy } from 'lucide-react';
+import { Head } from '@inertiajs/react';
+import { CalendarDays, Dumbbell } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -99,7 +98,7 @@ export default function Dashboard() {
     async function submitCheckIn(isRestDay: boolean) {
         const weekdayIdx = new Date(selectedDate).getDay();
         const dayName = weekdayName(weekdayIdx);
-        const workoutFromPlan = !isRestDay ? (weeklyPlans[dayName] || null) : null;
+        const workoutFromPlan = !isRestDay ? weeklyPlans[dayName] || null : null;
 
         await fetch('/check-in', {
             method: 'POST',
@@ -143,9 +142,11 @@ export default function Dashboard() {
 
                 <div className="grid gap-6 md:grid-cols-3">
                     {/* Calendar */}
-                    <Card className="md:col-span-2" id="calendar">
+                    <Card className="md:col-span-3" id="calendar">
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><CalendarDays className="size-5 text-emerald-600" /> Training Calendar</CardTitle>
+                            <CardTitle className="flex items-center gap-2">
+                                <CalendarDays className="size-5 text-emerald-600" /> Training Calendar
+                            </CardTitle>
                             <CardDescription>Log workouts or rest days. Leg day gives bonus XP.</CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -153,7 +154,9 @@ export default function Dashboard() {
                                 <Button variant="outline" onClick={prevMonth}>
                                     Prev
                                 </Button>
-                                <div className="min-w-40 text-center font-medium">{monthName} {year}</div>
+                                <div className="min-w-40 text-center font-medium">
+                                    {monthName} {year}
+                                </div>
                                 <Button variant="outline" onClick={nextMonth}>
                                     Next
                                 </Button>
@@ -181,7 +184,9 @@ export default function Dashboard() {
                                             onClick={() => setSelectedDate(dIso)}
                                             className={[
                                                 'aspect-square rounded-lg border text-sm transition-colors',
-                                                selected ? 'border-emerald-600 ring-2 ring-emerald-600/40' : 'border-sidebar-border/70 dark:border-sidebar-border',
+                                                selected
+                                                    ? 'border-emerald-600 ring-2 ring-emerald-600/40'
+                                                    : 'border-sidebar-border/70 dark:border-sidebar-border',
                                                 isWorkout ? 'bg-emerald-600/15 text-emerald-800 dark:text-emerald-300' : '',
                                                 isRest ? 'bg-neutral-500/10 text-neutral-600 dark:text-neutral-300' : '',
                                             ].join(' ')}
@@ -217,66 +222,7 @@ export default function Dashboard() {
                             </div>
                         </CardContent>
                     </Card>
-
-                    {/* Profile Stats */}
-                    <Card id="profile">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Trophy className="size-5 text-amber-500" /> Profile Stats</CardTitle>
-                            <CardDescription>XP, level, title, most active day</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <div className="text-3xl font-bold">Lvl {profile?.level ?? 1}</div>
-                                    <div className="text-sm text-muted-foreground">{profile?.title || 'Novice'}</div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-xl font-semibold">{profile?.xp ?? 0} XP</div>
-                                    <div className="text-xs text-muted-foreground">{100 - progressToNext} XP to next level</div>
-                                </div>
-                            </div>
-                            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
-                                <div
-                                    className="h-full rounded-full bg-emerald-600 transition-all"
-                                    style={{ width: `${progressToNext}%` }}
-                                />
-                            </div>
-                            <div className="mt-3 text-sm">
-                                Most active: <span className="font-medium">{profile?.most_active_day || '—'}</span>
-                            </div>
-                        </CardContent>
-                    </Card>
                 </div>
-
-                {/* Weekly Plan */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Dumbbell className="size-5 text-emerald-600" /> Weekly Plan</CardTitle>
-                        <CardDescription>Edit your plan for each weekday</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                            {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-                                <div key={day} className="rounded-lg border p-3">
-                                    <div className="mb-2 flex items-center justify-between">
-                                        <div className="font-medium">{day}</div>
-                                        {weeklyPlans[day] ? (
-                                            <Badge className="bg-emerald-600 text-white dark:bg-emerald-500">Planned</Badge>
-                                        ) : (
-                                            <Badge variant="outline">Empty</Badge>
-                                        )}
-                                    </div>
-                                    <Input
-                                        value={weeklyPlans[day] || ''}
-                                        placeholder="e.g., leg day"
-                                        onChange={(e) => setWeeklyPlans((prev) => ({ ...prev, [day]: e.target.value }))}
-                                        onBlur={(e) => upsertPlan(day, e.target.value)}
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
 
                 {/* History */}
                 <Card>
@@ -286,9 +232,7 @@ export default function Dashboard() {
                     </CardHeader>
                     <CardContent>
                         <div className="grid gap-2">
-                            {calendarLogs.length === 0 && (
-                                <div className="text-sm text-muted-foreground">No logs yet.</div>
-                            )}
+                            {calendarLogs.length === 0 && <div className="text-sm text-muted-foreground">No logs yet.</div>}
                             {calendarLogs
                                 .slice()
                                 .sort((a, b) => a.date.localeCompare(b.date))
