@@ -17,6 +17,15 @@ Route::get('/health', function () {
     ]);
 });
 
+// Additional health endpoint for Railway (alternative)
+Route::get('/health/railway', function () {
+    return response()->json([
+        'status' => 'healthy',
+        'service' => 'Buhat-Buddy',
+        'timestamp' => now()->toISOString()
+    ]);
+});
+
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
