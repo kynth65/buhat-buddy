@@ -144,7 +144,7 @@ export default function WeeklyDay() {
                                 onChange={(e) => setLabel(e.target.value)}
                                 onBlur={(e) => saveLabel(e.target.value)}
                                 placeholder="Add a label (e.g., chest day)"
-                                className="w-full sm:w-64"
+                                className="w-full text-base font-semibold sm:w-64 sm:text-sm"
                             />
                         </div>
                         <Dialog open={open} onOpenChange={setOpen}>

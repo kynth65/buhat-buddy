@@ -52,9 +52,6 @@ export default function Profile() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Trophy className="size-5 text-primary" /> Profile Stats
-                        </CardTitle>
                         <CardDescription>XP, level, title, most active day</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -77,39 +74,33 @@ export default function Profile() {
                     </CardContent>
                 </Card>
 
-                {/* Charts */}
+                {/* Mobile-friendly cards (replace charts) */}
                 <div className="grid gap-4 md:grid-cols-2">
-                    {/* XP over time (line) */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>XP Over Time</CardTitle>
-                            <CardDescription>Your cumulative XP progression (all-time)</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {stats?.xp_over_time?.length ? (
-                                <SimpleLineChart data={stats.xp_over_time} color="var(--color-primary)" />
-                            ) : (
-                                <div className="text-sm text-muted-foreground">No data yet</div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    {/* Weekday distribution (bar) */}
+                    {/* Weekday totals */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Workouts by Weekday</CardTitle>
-                            <CardDescription>When you train the most (count of workouts)</CardDescription>
+                            <CardDescription>Count per weekday</CardDescription>
                         </CardHeader>
                         <CardContent>
                             {stats ? (
-                                <SimpleBarChart labels={weekdayLabels} values={stats.weekday_counts} color="var(--color-primary)" />
+                                <ul className="divide-y">
+                                    {weekdayLabels.map((w, i) => (
+                                        <li key={w} className="flex items-center justify-between py-2 text-sm">
+                                            <span className="font-medium">{w}</span>
+                                            <span className="rounded bg-primary/10 px-2 py-0.5 font-semibold text-primary">
+                                                {stats.weekday_counts[i] ?? 0}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
                             ) : (
                                 <div className="text-sm text-muted-foreground">No data yet</div>
                             )}
                         </CardContent>
                     </Card>
 
-                    {/* Label distribution (bar) */}
+                    {/* Top labels */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Top Workout Labels</CardTitle>
@@ -117,32 +108,71 @@ export default function Profile() {
                         </CardHeader>
                         <CardContent>
                             {stats?.label_distribution?.length ? (
-                                <SimpleBarChart
-                                    labels={stats.label_distribution.map((l) => l.label)}
-                                    values={stats.label_distribution.map((l) => l.count)}
-                                    color="var(--color-secondary)"
-                                />
+                                <ul className="divide-y">
+                                    {stats.label_distribution.map((l) => (
+                                        <li key={l.label} className="flex items-center justify-between py-2 text-sm">
+                                            <span className="truncate font-medium">{l.label}</span>
+                                            <span className="rounded bg-secondary px-2 py-0.5 font-semibold text-secondary-foreground">
+                                                {l.count}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
                             ) : (
                                 <div className="text-sm text-muted-foreground">No data yet</div>
                             )}
                         </CardContent>
                     </Card>
 
-                    {/* Weekly summary (stacked-ish) */}
-                    <Card>
+                    {/* Last 8 weeks summary */}
+                    <Card className="md:col-span-2">
                         <CardHeader>
                             <CardTitle>Last 8 Weeks</CardTitle>
-                            <CardDescription>Weekly totals (Mon–Sun): workouts vs rest</CardDescription>
+                            <CardDescription>Weekly totals (Mon–Sun)</CardDescription>
                         </CardHeader>
                         <CardContent>
                             {stats?.weekly_summary?.length ? (
-                                <GroupedBarChart
-                                    categories={stats.weekly_summary.map((w) => w.week_start)}
-                                    series={[
-                                        { name: 'Workouts', values: stats.weekly_summary.map((w) => w.workouts), color: 'var(--color-primary)' },
-                                        { name: 'Rest', values: stats.weekly_summary.map((w) => w.rest), color: '#222831' },
-                                    ]}
-                                />
+                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                                    {stats.weekly_summary.map((w) => (
+                                        <div key={w.week_start} className="rounded-lg border p-3">
+                                            <div className="text-xs text-muted-foreground">Week of {new Date(w.week_start).toLocaleDateString()}</div>
+                                            <div className="mt-2 flex items-center justify-between">
+                                                <div className="text-sm font-medium">Workouts</div>
+                                                <div className="rounded bg-primary/10 px-2 py-0.5 text-sm font-semibold text-primary">
+                                                    {w.workouts}
+                                                </div>
+                                            </div>
+                                            <div className="mt-1 flex items-center justify-between">
+                                                <div className="text-sm font-medium">Rest</div>
+                                                <div className="rounded bg-[#222831]/10 px-2 py-0.5 text-sm font-semibold text-[#222831] dark:text-[#f2f2f2]">
+                                                    {w.rest}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-sm text-muted-foreground">No data yet</div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* XP milestones */}
+                    <Card className="md:col-span-2">
+                        <CardHeader>
+                            <CardTitle>XP Milestones</CardTitle>
+                            <CardDescription>Recent XP checkpoints</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {stats?.xp_over_time?.length ? (
+                                <ul className="divide-y">
+                                    {stats.xp_over_time.slice(-6).map((p) => (
+                                        <li key={p.date} className="flex items-center justify-between py-2 text-sm">
+                                            <span className="text-muted-foreground">{new Date(p.date).toLocaleDateString()}</span>
+                                            <span className="font-semibold">{p.xp} XP</span>
+                                        </li>
+                                    ))}
+                                </ul>
                             ) : (
                                 <div className="text-sm text-muted-foreground">No data yet</div>
                             )}

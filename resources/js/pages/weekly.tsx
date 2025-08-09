@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 // removed per-day inline Input; label is edited on the day page
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
@@ -55,9 +55,6 @@ export default function Weekly() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Dumbbell className="size-5 text-emerald-600" /> Weekly Plan
-                        </CardTitle>
                         <CardDescription>Edit your plan for each weekday</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -76,7 +73,9 @@ export default function Weekly() {
                                             <Badge className="bg-secondary text-secondary-foreground">Empty</Badge>
                                         )}
                                     </div>
-                                    <div className="text-sm text-muted-foreground">{weeklyPlans[day] ? weeklyPlans[day] : 'No label yet'}</div>
+                                    <div className="text-base font-semibold text-foreground sm:text-sm">
+                                        {weeklyPlans[day] ? weeklyPlans[day] : 'No label yet'}
+                                    </div>
                                 </div>
                             ))}
                         </div>
