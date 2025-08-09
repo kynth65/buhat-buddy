@@ -1,7 +1,7 @@
-# Use Node.js 20 as base and install PHP on top
-FROM node:20-slim
+# Use PHP 8.2 CLI as base and install Node.js on top
+FROM php:8.2-cli
 
-# Install system dependencies for PHP
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -17,15 +17,16 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Add PHP repository and install PHP 8.2
-RUN curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --dearmor -o /usr/share/keyrings/php.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/php.gpg] https://packages.sury.org/php/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/php.list \
-    && apt-get update \
-    && apt-get install -y php8.2-cli php8.2-mbstring php8.2-xml php8.2-gd php8.2-sqlite3 php8.2-pgsql php8.2-mysql php8.2-bcmath php8.2-pcntl php8.2-exif \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql pdo_pgsql pdo_sqlite mbstring exif pcntl bcmath gd
 
-# PHP extensions are already installed via packages
+# Install Node.js 20.x
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && node --version \
+    && npm --version
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -43,13 +44,19 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts
 COPY package.json package-lock.json ./
 
 # Install Node dependencies (including dev dependencies for build)
-RUN npm install --verbose --no-audit --no-fund
+RUN npm install --verbose --no-audit --no-fund --legacy-peer-deps
 
 # Copy application code
 COPY . .
 
 # Show versions for debugging
-RUN echo "Node: $(node --version), NPM: $(npm --version), PHP: $(php --version)"
+RUN echo "=== Environment Info ===" && \
+    echo "Node: $(node --version)" && \
+    echo "NPM: $(npm --version)" && \
+    echo "PHP: $(php --version)" && \
+    echo "Composer: $(composer --version)" && \
+    echo "Current directory: $(pwd)" && \
+    echo "Directory contents:" && ls -la
 
 # Create basic .env file for production
 RUN echo "APP_NAME=Buhat-Buddy\nAPP_ENV=production\nAPP_DEBUG=false\nAPP_KEY=\nDB_CONNECTION=sqlite\nDB_DATABASE=/app/database/database.sqlite\nCACHE_DRIVER=file\nSESSION_DRIVER=file\nQUEUE_CONNECTION=sync" > .env
@@ -58,8 +65,8 @@ RUN echo "APP_NAME=Buhat-Buddy\nAPP_ENV=production\nAPP_DEBUG=false\nAPP_KEY=\nD
 RUN php artisan key:generate --force
 
 # Build frontend assets (both standard and SSR)
-RUN npm run build
-RUN npm run build:ssr
+RUN npm run build || (echo "Standard build failed" && exit 1)
+RUN npm run build:ssr || (echo "SSR build failed" && exit 1)
 
 # Clean up npm cache and remove dev dependencies to reduce image size
 RUN npm cache clean --force && \
