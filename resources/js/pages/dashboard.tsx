@@ -1,5 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
@@ -126,6 +128,23 @@ export default function Dashboard() {
 
     const progressToNext = profile ? profile.xp % 100 : 0;
 
+    // History dialog state
+    const [historyOpen, setHistoryOpen] = useState(false);
+    const [historyYear, setHistoryYear] = useState<number>(new Date().getFullYear());
+    const [historyMonth, setHistoryMonth] = useState<number>(new Date().getMonth() + 1);
+    const [historyLogs, setHistoryLogs] = useState<Array<{ date: string; is_rest_day: boolean; workout_text?: string | null }>>([]);
+
+    function formatDisplayDate(iso: string) {
+        const d = new Date(iso);
+        return `${d.toLocaleString(undefined, { month: 'long' })} - ${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    async function fetchHistory(y: number, m: number) {
+        const res = await fetch(`/calendar?year=${y}&month=${m}`);
+        const data = await res.json();
+        setHistoryLogs(data.logs ?? []);
+    }
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Buhat-Buddy" />
@@ -219,26 +238,39 @@ export default function Dashboard() {
                                 <Button size="sm" variant="outline" onClick={() => submitCheckIn(true)}>
                                     Rest Day
                                 </Button>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                        setHistoryYear(year);
+                                        setHistoryMonth(month);
+                                        fetchHistory(year, month);
+                                        setHistoryOpen(true);
+                                    }}
+                                >
+                                    History
+                                </Button>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* History */}
+                {/* History (compact preview) */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Workout History</CardTitle>
-                        <CardDescription>What you logged this month</CardDescription>
+                        <CardTitle>Recent History</CardTitle>
+                        <CardDescription>Last 10 days (latest first)</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="grid gap-2">
                             {calendarLogs.length === 0 && <div className="text-sm text-muted-foreground">No logs yet.</div>}
                             {calendarLogs
                                 .slice()
-                                .sort((a, b) => a.date.localeCompare(b.date))
+                                .sort((a, b) => b.date.localeCompare(a.date))
+                                .slice(0, 10)
                                 .map((l) => (
                                     <div key={l.date} className="flex items-center justify-between rounded-lg border p-2 text-sm">
-                                        <div className="font-medium">{l.date}</div>
+                                        <div className="font-medium">{formatDisplayDate(l.date)}</div>
                                         <div className="text-right">
                                             {l.is_rest_day ? (
                                                 <span className="text-muted-foreground">Rest day</span>
@@ -249,8 +281,91 @@ export default function Dashboard() {
                                     </div>
                                 ))}
                         </div>
+                        <div className="mt-3 flex justify-end">
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                    setHistoryYear(year);
+                                    setHistoryMonth(month);
+                                    fetchHistory(year, month);
+                                    setHistoryOpen(true);
+                                }}
+                            >
+                                View by month
+                            </Button>
+                        </div>
                     </CardContent>
                 </Card>
+
+                {/* History dialog with month/year filter */}
+                <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Workout History</DialogTitle>
+                        </DialogHeader>
+                        <div className="mb-3 grid grid-cols-2 gap-2">
+                            <Select
+                                value={String(historyMonth)}
+                                onValueChange={(v) => {
+                                    const m = Number(v);
+                                    setHistoryMonth(m);
+                                    fetchHistory(historyYear, m);
+                                }}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Month" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Array.from({ length: 12 }).map((_, i) => (
+                                        <SelectItem key={i + 1} value={String(i + 1)}>
+                                            {new Date(2000, i, 1).toLocaleString(undefined, { month: 'long' })}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Select
+                                value={String(historyYear)}
+                                onValueChange={(v) => {
+                                    const y = Number(v);
+                                    setHistoryYear(y);
+                                    fetchHistory(y, historyMonth);
+                                }}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Year" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Array.from({ length: 6 }).map((_, i) => {
+                                        const y = new Date().getFullYear() - i;
+                                        return (
+                                            <SelectItem key={y} value={String(y)}>
+                                                {y}
+                                            </SelectItem>
+                                        );
+                                    })}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="max-h-80 overflow-auto">
+                            {historyLogs
+                                .slice()
+                                .sort((a, b) => b.date.localeCompare(a.date))
+                                .map((l) => (
+                                    <div key={l.date} className="flex items-center justify-between rounded-lg border p-2 text-sm">
+                                        <div className="font-medium">{formatDisplayDate(l.date)}</div>
+                                        <div className="text-right">
+                                            {l.is_rest_day ? (
+                                                <span className="text-muted-foreground">Rest day</span>
+                                            ) : (
+                                                <span>{l.workout_text || 'Workout'}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </div>
         </AppLayout>
     );
