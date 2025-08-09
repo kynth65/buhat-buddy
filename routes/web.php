@@ -7,6 +7,16 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\WeeklyPlanController;
 use App\Http\Controllers\ProfileStatsController;
 
+// Health check endpoint for Railway
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'healthy',
+        'timestamp' => now()->toISOString(),
+        'service' => 'Buhat-Buddy',
+        'version' => '1.0.0'
+    ]);
+});
+
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');

@@ -85,4 +85,7 @@ ls -la public/
 echo "Starting server..."
 
 # Start the server with verbose output
+echo "Server starting on port $PORT..."
+echo "Health endpoint available at: http://0.0.0.0:$PORT/health"
+echo "Main endpoint available at: http://0.0.0.0:$PORT/"
 php -S 0.0.0.0:$PORT -t public -d display_errors=1 -d log_errors=1
