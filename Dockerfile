@@ -34,20 +34,24 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /app
 
-# Copy composer files
-COPY composer.json composer.lock ./
+# Copy application code first
+COPY . .
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Copy package.json files
-COPY package.json package-lock.json ./
-
 # Install Node dependencies (including dev dependencies for build)
-RUN npm install --verbose --no-audit --no-fund --legacy-peer-deps
-
-# Copy application code
-COPY . .
+RUN echo "=== Starting npm install ===" && \
+    echo "Current directory: $(pwd)" && \
+    echo "Package.json exists: $(test -f package.json && echo 'YES' || echo 'NO')" && \
+    echo "Package-lock.json exists: $(test -f package-lock.json && echo 'YES' || echo 'NO')" && \
+    echo "Directory contents:" && ls -la && \
+    echo "NPM config:" && npm config list && \
+    echo "NPM cache location:" && npm config get cache && \
+    npm cache clean --force && \
+    (npm ci --verbose --no-audit --no-fund || npm install --verbose --no-audit --no-fund --legacy-peer-deps) || \
+    (echo "NPM install failed, trying alternative approach..." && \
+     npm install --force --verbose --no-audit --no-fund --legacy-peer-deps)
 
 # Show versions for debugging
 RUN echo "=== Environment Info ===" && \
