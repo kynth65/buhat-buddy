@@ -6,6 +6,8 @@ use App\Http\Controllers\WorkoutLogController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\WeeklyPlanController;
 use App\Http\Controllers\ProfileStatsController;
+use App\Http\Controllers\WeeklyPlanItemController;
+use App\Http\Controllers\WorkoutTemplateController;
 
 // Health check endpoint for Railway
 Route::get('/health', function () {
@@ -40,6 +42,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('weekly');
     })->name('weekly');
 
+    Route::get('/weekly/{day}', function (string $day) {
+        return Inertia::render('weekly-day', [
+            'day' => $day,
+        ]);
+    })->name('weekly.day');
+
     Route::get('/profile', function () {
         return Inertia::render('profile');
     })->name('profile');
@@ -50,6 +58,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/weekly-plan', [WeeklyPlanController::class, 'index']);
     Route::put('/weekly-plan/{weeklyPlan}', [WeeklyPlanController::class, 'update']);
     Route::post('/weekly-plan', [WeeklyPlanController::class, 'upsert']);
+
+    // Weekly plan items (CRUD)
+    Route::get('/weekly-plan/{weeklyPlan}/items', [WeeklyPlanItemController::class, 'index']);
+    Route::post('/weekly-plan/{weeklyPlan}/items', [WeeklyPlanItemController::class, 'store']);
+    Route::put('/weekly-plan/{weeklyPlan}/items/{item}', [WeeklyPlanItemController::class, 'update']);
+    Route::delete('/weekly-plan/{weeklyPlan}/items/{item}', [WeeklyPlanItemController::class, 'destroy']);
+
+    // Workout templates
+    Route::get('/workout-templates', [WorkoutTemplateController::class, 'index']);
+    Route::post('/weekly-plan/{weeklyPlan}/apply-template', [WorkoutTemplateController::class, 'apply']);
 
     // Profile stats JSON for frontend consumption
     Route::get('/api/profile', [ProfileStatsController::class, 'show']);

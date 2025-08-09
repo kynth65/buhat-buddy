@@ -17,4 +17,12 @@ class WeeklyPlan extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Items/exercises belonging to this weekly plan entry (one day).
+     */
+    public function items()
+    {
+        return $this->hasMany(WeeklyPlanItem::class)->orderBy('position');
+    }
 }

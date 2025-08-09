@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { Dumbbell } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -63,7 +63,11 @@ export default function Weekly() {
                     <CardContent>
                         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                             {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-                                <div key={day} className="rounded-lg border p-3">
+                                <div
+                                    key={day}
+                                    className="cursor-pointer rounded-lg border p-3 hover:bg-muted/30"
+                                    onClick={() => router.visit(`/weekly/${day}`)}
+                                >
                                     <div className="mb-2 flex items-center justify-between">
                                         <div className="font-medium">{day}</div>
                                         {weeklyPlans[day] ? (
@@ -77,6 +81,7 @@ export default function Weekly() {
                                         placeholder="e.g., leg day"
                                         onChange={(e) => setWeeklyPlans((prev) => ({ ...prev, [day]: e.target.value }))}
                                         onBlur={(e) => upsertPlan(day, e.target.value)}
+                                        onClick={(e) => e.stopPropagation()}
                                     />
                                 </div>
                             ))}
