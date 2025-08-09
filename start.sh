@@ -87,5 +87,9 @@ echo "Starting server..."
 # Start the server with verbose output
 echo "Server starting on port $PORT..."
 echo "Health endpoint available at: http://0.0.0.0:$PORT/health"
+echo "Railway health endpoint available at: http://0.0.0.0:$PORT/health/railway"
 echo "Main endpoint available at: http://0.0.0.0:$PORT/"
-php -S 0.0.0.0:$PORT -t public -d display_errors=1 -d log_errors=1
+echo "Binding to 0.0.0.0:$PORT for external access..."
+
+# Start the server with proper binding for Railway
+php -S 0.0.0.0:$PORT -t public -d display_errors=1 -d log_errors=1 -d max_execution_time=0
