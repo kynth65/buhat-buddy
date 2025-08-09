@@ -27,8 +27,8 @@ storage/framework/sessions/*
 storage/framework/views/*
 bootstrap/cache/*
 
-# Database
-database/database.sqlite
+# Database (using PostgreSQL in production)
+# database/database.sqlite
 
 # IDE and editor files
 .vscode

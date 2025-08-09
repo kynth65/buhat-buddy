@@ -62,8 +62,8 @@ RUN echo "=== Environment Info ===" && \
     echo "Current directory: $(pwd)" && \
     echo "Directory contents:" && ls -la
 
-# Create basic .env file for production
-RUN echo "APP_NAME=Buhat-Buddy\nAPP_ENV=production\nAPP_DEBUG=false\nAPP_KEY=\nDB_CONNECTION=sqlite\nDB_DATABASE=/app/database/database.sqlite\nCACHE_DRIVER=file\nSESSION_DRIVER=file\nQUEUE_CONNECTION=sync" > .env
+# Create basic .env file for production (will be overridden by Railway env vars)
+RUN echo "APP_NAME=Buhat-Buddy\nAPP_ENV=production\nAPP_DEBUG=false\nAPP_KEY=\nDB_CONNECTION=pgsql\nCACHE_DRIVER=file\nSESSION_DRIVER=file\nQUEUE_CONNECTION=sync" > .env
 
 # Generate application key
 RUN php artisan key:generate --force
@@ -95,13 +95,14 @@ RUN echo "Creating storage directories..." && \
     chmod -R 775 /app/bootstrap/ssr || echo "SSR permissions failed" && \
     echo "Storage setup completed"
 
-# Create SQLite database file if it doesn't exist
-RUN echo "Creating SQLite database..." && \
-    touch /app/database/database.sqlite && \
-    echo "Database file created"
+# Note: Using PostgreSQL in production, no local database file needed
+RUN echo "Production database: PostgreSQL (configured via environment variables)"
+
+# Make startup script executable
+RUN chmod +x /app/start.sh
 
 # Expose port
 EXPOSE $PORT
 
 # Run migrations and start server
-CMD php artisan migrate --force && php -S 0.0.0.0:$PORT -t public
+CMD ["/app/start.sh"]

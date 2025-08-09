@@ -3,7 +3,7 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "php artisan migrate --force && php -S 0.0.0.0:$PORT -t public"
+startCommand = "/app/start.sh"
 healthcheckPath = "/"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
@@ -16,3 +16,5 @@ LOG_LEVEL = "error"
 CACHE_DRIVER = "file"
 SESSION_DRIVER = "file"
 QUEUE_CONNECTION = "sync"
+DB_CONNECTION = "pgsql"
+DB_PORT = "5432"
