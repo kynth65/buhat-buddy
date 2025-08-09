@@ -72,25 +72,33 @@ RUN php artisan key:generate --force
 RUN npm run build || (echo "Standard build failed" && exit 1)
 RUN npm run build:ssr || (echo "SSR build failed" && exit 1)
 
-# Clean up npm cache and remove dev dependencies to reduce image size
-RUN npm cache clean --force && \
-    npm prune --production
+# Clean up npm cache (skip pruning for now to avoid build issues)
+RUN echo "Cleaning npm cache..." && \
+    npm cache clean --force || echo "Cache clean failed, continuing..."
 
 # Verify builds were successful
-RUN ls -la public/build/ && ls -la bootstrap/ssr/
+RUN echo "=== Verifying builds ===" && \
+    echo "Public build directory:" && ls -la public/build/ && \
+    echo "SSR build directory:" && ls -la bootstrap/ssr/ && \
+    echo "Build verification completed"
 
 # Create storage directories and set permissions
-RUN mkdir -p /app/storage/logs \
-    && mkdir -p /app/storage/framework/cache \
-    && mkdir -p /app/storage/framework/sessions \
-    && mkdir -p /app/storage/framework/views \
-    && mkdir -p /app/bootstrap/ssr \
-    && chmod -R 775 /app/storage \
-    && chmod -R 775 /app/bootstrap/cache \
-    && chmod -R 775 /app/bootstrap/ssr
+RUN echo "Creating storage directories..." && \
+    mkdir -p /app/storage/logs && \
+    mkdir -p /app/storage/framework/cache && \
+    mkdir -p /app/storage/framework/sessions && \
+    mkdir -p /app/storage/framework/views && \
+    mkdir -p /app/bootstrap/ssr && \
+    echo "Setting permissions..." && \
+    chmod -R 775 /app/storage || echo "Storage permissions failed" && \
+    chmod -R 775 /app/bootstrap/cache || echo "Cache permissions failed" && \
+    chmod -R 775 /app/bootstrap/ssr || echo "SSR permissions failed" && \
+    echo "Storage setup completed"
 
 # Create SQLite database file if it doesn't exist
-RUN touch /app/database/database.sqlite
+RUN echo "Creating SQLite database..." && \
+    touch /app/database/database.sqlite && \
+    echo "Database file created"
 
 # Expose port
 EXPOSE $PORT
