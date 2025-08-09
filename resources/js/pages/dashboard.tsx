@@ -1,10 +1,9 @@
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { CalendarDays, Dumbbell } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -136,7 +135,6 @@ export default function Dashboard() {
                     <div className="flex items-center gap-3">
                         <Dumbbell className="size-6 text-primary" />
                         <h1 className="text-xl font-semibold text-foreground">Buhat-Buddy</h1>
-                        <Badge className="bg-primary text-primary-foreground">Train. Log. Level Up.</Badge>
                     </div>
                 </div>
 
@@ -150,15 +148,13 @@ export default function Dashboard() {
                             <CardDescription>Log workouts or rest days. Leg day gives bonus XP.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="mb-4 flex flex-wrap items-center gap-2">
+                            <div className="mb-4 flex flex-wrap items-center justify-center gap-2 sm:justify-end">
                                 <Button variant="outline" size="sm" onClick={prevMonth}>
-                                    Prev
+                                    <ChevronLeft className="size-4" />
                                 </Button>
-                                <div className="min-w-40 text-center text-sm font-medium sm:text-base">
-                                    {monthName} {year}
-                                </div>
+                                <div className="min-w-30 text-center text-sm font-medium sm:text-base">{monthName}</div>
                                 <Button variant="outline" size="sm" onClick={nextMonth}>
-                                    Next
+                                    <ChevronRight className="size-4" />
                                 </Button>
                             </div>
 
@@ -183,7 +179,7 @@ export default function Dashboard() {
                                             key={dIso}
                                             onClick={() => setSelectedDate(dIso)}
                                             className={[
-                                                'aspect-square rounded-lg border text-xs sm:text-sm transition-colors',
+                                                'aspect-square rounded-lg border text-xs transition-colors sm:text-sm',
                                                 selected
                                                     ? 'border-primary ring-2 ring-primary/40'
                                                     : 'border-sidebar-border/70 dark:border-sidebar-border',
@@ -192,7 +188,7 @@ export default function Dashboard() {
                                             ].join(' ')}
                                         >
                                             <div className="flex h-full flex-col items-center justify-center">
-                                                <div className="font-semibold leading-none">{day}</div>
+                                                <div className="leading-none font-semibold">{day}</div>
                                             </div>
                                         </button>
                                     );
@@ -212,8 +208,12 @@ export default function Dashboard() {
                                 })()}
                             </div>
 
-                            <div className="mt-4 flex flex-wrap items-center gap-2">
-                                <Button size="sm" onClick={() => submitCheckIn(false)} className="bg-primary text-primary-foreground hover:bg-[#e06100]">
+                            <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:justify-end">
+                                <Button
+                                    size="sm"
+                                    onClick={() => submitCheckIn(false)}
+                                    className="bg-primary text-primary-foreground hover:bg-[#e06100]"
+                                >
                                     Workout
                                 </Button>
                                 <Button size="sm" variant="outline" onClick={() => submitCheckIn(true)}>
