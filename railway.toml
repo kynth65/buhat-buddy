@@ -13,9 +13,13 @@ restartPolicyMaxRetries = 3
 [deploy.envs]
 APP_ENV = "production"
 APP_DEBUG = "false"
+APP_URL = "https://buhat-buddy-production.up.railway.app"
 LOG_LEVEL = "error"
 CACHE_DRIVER = "file"
 SESSION_DRIVER = "file"
+SESSION_SECURE_COOKIE = "true"
+SESSION_SAME_SITE = "lax"
+SESSION_DOMAIN = "buhat-buddy-production.up.railway.app"
 QUEUE_CONNECTION = "sync"
 DB_CONNECTION = "pgsql"
 DB_PORT = "5432"
