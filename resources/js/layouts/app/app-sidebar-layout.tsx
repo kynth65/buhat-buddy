@@ -1,4 +1,5 @@
 import { AppContent } from '@/components/app-content';
+import AppHeaderNav from '@/components/app-header-nav';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
@@ -9,10 +10,12 @@ export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWi
     return (
         <AppShell variant="sidebar">
             <AppSidebar />
-            <AppContent variant="sidebar" className="overflow-x-hidden">
+            <AppContent variant="sidebar" className="overflow-x-hidden pb-20 md:pb-0">
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
                 {children}
             </AppContent>
+            {/* Mobile persistent bottom nav */}
+            <AppHeaderNav />
         </AppShell>
     );
 }

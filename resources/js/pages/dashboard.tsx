@@ -130,7 +130,7 @@ export default function Dashboard() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Buhat-Buddy" />
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-3 sm:gap-6 sm:p-4">
+            <div className="flex h-full flex-1 flex-col gap-3 rounded-xl p-3 sm:gap-6 sm:p-4">
                 {/* Hero / Sports banner */}
                 <div className="rounded-xl border bg-primary/5 p-4 sm:p-6">
                     <div className="flex items-center gap-3">
@@ -140,7 +140,7 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-3">
+                <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
                     {/* Calendar */}
                     <Card className="md:col-span-3" id="calendar">
                         <CardHeader>
@@ -150,24 +150,24 @@ export default function Dashboard() {
                             <CardDescription>Log workouts or rest days. Leg day gives bonus XP.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="mb-4 flex items-center gap-2">
-                                <Button variant="outline" onClick={prevMonth}>
+                            <div className="mb-4 flex flex-wrap items-center gap-2">
+                                <Button variant="outline" size="sm" onClick={prevMonth}>
                                     Prev
                                 </Button>
-                                <div className="min-w-40 text-center font-medium">
+                                <div className="min-w-40 text-center text-sm font-medium sm:text-base">
                                     {monthName} {year}
                                 </div>
-                                <Button variant="outline" onClick={nextMonth}>
+                                <Button variant="outline" size="sm" onClick={nextMonth}>
                                     Next
                                 </Button>
                             </div>
 
-                            <div className="grid grid-cols-7 gap-2 text-center text-xs font-medium text-muted-foreground">
+                            <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-medium text-muted-foreground sm:gap-2 sm:text-xs">
                                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
                                     <div key={d}>{d}</div>
                                 ))}
                             </div>
-                            <div className="mt-2 grid grid-cols-7 gap-2">
+                            <div className="mt-2 grid grid-cols-7 gap-1 sm:gap-2">
                                 {Array.from({ length: firstDayOfWeek }).map((_, i) => (
                                     <div key={`pad-${i}`} />
                                 ))}
@@ -183,7 +183,7 @@ export default function Dashboard() {
                                             key={dIso}
                                             onClick={() => setSelectedDate(dIso)}
                                             className={[
-                                                'aspect-square rounded-lg border text-sm transition-colors',
+                                                'aspect-square rounded-lg border text-xs sm:text-sm transition-colors',
                                                 selected
                                                     ? 'border-primary ring-2 ring-primary/40'
                                                     : 'border-sidebar-border/70 dark:border-sidebar-border',
@@ -192,7 +192,7 @@ export default function Dashboard() {
                                             ].join(' ')}
                                         >
                                             <div className="flex h-full flex-col items-center justify-center">
-                                                <div className="font-semibold">{day}</div>
+                                                <div className="font-semibold leading-none">{day}</div>
                                             </div>
                                         </button>
                                     );
@@ -213,10 +213,10 @@ export default function Dashboard() {
                             </div>
 
                             <div className="mt-4 flex flex-wrap items-center gap-2">
-                                <Button onClick={() => submitCheckIn(false)} className="bg-primary text-primary-foreground hover:bg-[#e06100]">
+                                <Button size="sm" onClick={() => submitCheckIn(false)} className="bg-primary text-primary-foreground hover:bg-[#e06100]">
                                     Workout
                                 </Button>
-                                <Button variant="outline" onClick={() => submitCheckIn(true)}>
+                                <Button size="sm" variant="outline" onClick={() => submitCheckIn(true)}>
                                     Rest Day
                                 </Button>
                             </div>

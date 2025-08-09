@@ -83,7 +83,7 @@ export default function Profile() {
                     <Card>
                         <CardHeader>
                             <CardTitle>XP Over Time</CardTitle>
-                            <CardDescription>Your cumulative XP progression</CardDescription>
+                            <CardDescription>Your cumulative XP progression (all-time)</CardDescription>
                         </CardHeader>
                         <CardContent>
                             {stats?.xp_over_time?.length ? (
@@ -98,7 +98,7 @@ export default function Profile() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Workouts by Weekday</CardTitle>
-                            <CardDescription>When you train the most</CardDescription>
+                            <CardDescription>When you train the most (count of workouts)</CardDescription>
                         </CardHeader>
                         <CardContent>
                             {stats ? (
@@ -113,7 +113,7 @@ export default function Profile() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Top Workout Labels</CardTitle>
-                            <CardDescription>Your most frequent routines</CardDescription>
+                            <CardDescription>Your most frequent routines (top 10)</CardDescription>
                         </CardHeader>
                         <CardContent>
                             {stats?.label_distribution?.length ? (
@@ -132,7 +132,7 @@ export default function Profile() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Last 8 Weeks</CardTitle>
-                            <CardDescription>Workouts vs Rest</CardDescription>
+                            <CardDescription>Weekly totals (Mon–Sun): workouts vs rest</CardDescription>
                         </CardHeader>
                         <CardContent>
                             {stats?.weekly_summary?.length ? (
@@ -168,10 +168,34 @@ function SimpleLineChart({ data, color }: { data: Array<{ date: string; xp: numb
     const scaleX = (x: number) => padding + ((x - minX) / Math.max(1, maxX - minX)) * (width - padding * 2);
     const scaleY = (y: number) => height - padding - ((y - minY) / Math.max(1, maxY - minY)) * (height - padding * 2);
     const dPath = data.map((p, i) => `${i === 0 ? 'M' : 'L'} ${scaleX(new Date(p.date).getTime())} ${scaleY(p.xp)}`).join(' ');
+    const xTicks = 4;
+    const yTicks = 4;
+    const tickXVals = Array.from({ length: xTicks + 1 }, (_, i) => minX + ((maxX - minX) * i) / xTicks);
+    const tickYVals = Array.from({ length: yTicks + 1 }, (_, i) => minY + ((maxY - minY) * i) / yTicks);
     return (
-        <div className="w-full overflow-x-auto">
-            <svg viewBox={`0 0 ${width} ${height}`} className="h-48 w-[600px]">
+        <div className="w-full">
+            <svg viewBox={`0 0 ${width} ${height}`} className="h-48 w-full sm:h-56">
+                {/* grid */}
+                {tickXVals.map((x, i) => (
+                    <line key={`gx-${i}`} x1={scaleX(x)} y1={padding} x2={scaleX(x)} y2={height - padding} stroke="#e5e7eb" strokeWidth={1} />
+                ))}
+                {tickYVals.map((y, i) => (
+                    <line key={`gy-${i}`} x1={padding} y1={scaleY(y)} x2={width - padding} y2={scaleY(y)} stroke="#e5e7eb" strokeWidth={1} />
+                ))}
+                {/* line */}
                 <path d={dPath} fill="none" stroke={color} strokeWidth={2} />
+                {/* y labels */}
+                {tickYVals.map((y, i) => (
+                    <text key={`yl-${i}`} x={8} y={scaleY(y)} fontSize={10} fill="#6b7280">
+                        {Math.round(y)}
+                    </text>
+                ))}
+                {/* x labels */}
+                {tickXVals.map((x, i) => (
+                    <text key={`xl-${i}`} x={scaleX(x)} y={height - 8} fontSize={10} fill="#6b7280" textAnchor="middle">
+                        {new Date(x).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </text>
+                ))}
             </svg>
         </div>
     );
@@ -184,13 +208,40 @@ function SimpleBarChart({ labels, values, color }: { labels: string[]; values: n
     const maxV = Math.max(1, ...values);
     const barW = (width - padding * 2) / Math.max(1, values.length);
     return (
-        <div className="w-full overflow-x-auto">
-            <svg viewBox={`0 0 ${width} ${height}`} className="h-48 w-[600px]">
+        <div className="w-full">
+            <svg viewBox={`0 0 ${width} ${height}`} className="h-48 w-full sm:h-56">
+                {/* axes */}
+                <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#e5e7eb" />
+                <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="#e5e7eb" />
+                {/* bars */}
                 {values.map((v, i) => {
                     const x = padding + i * barW + 6;
                     const h = ((v / maxV) * (height - padding * 2)) | 0;
                     const y = height - padding - h;
                     return <rect key={i} x={x} y={y} width={Math.max(10, barW - 12)} height={h} fill={color} rx={4} />;
+                })}
+                {/* x labels */}
+                {labels.map((l, i) => (
+                    <text
+                        key={`xl-${i}`}
+                        x={padding + i * barW + Math.max(10, barW - 12) / 2 + 6}
+                        y={height - padding + 12}
+                        fontSize={10}
+                        fill="#6b7280"
+                        textAnchor="middle"
+                    >
+                        {l}
+                    </text>
+                ))}
+                {/* y ticks */}
+                {[0, 0.25, 0.5, 0.75, 1].map((t, i) => {
+                    const val = Math.round(maxV * t);
+                    const y = height - padding - (height - padding * 2) * t;
+                    return (
+                        <text key={`yl-${i}`} x={padding - 6} y={y} fontSize={10} fill="#6b7280" textAnchor="end">
+                            {val}
+                        </text>
+                    );
                 })}
             </svg>
         </div>
@@ -207,8 +258,12 @@ function GroupedBarChart({ categories, series }: { categories: string[]; series:
     const barW = Math.max(8, (groupW - 12) / Math.max(1, barsPerGroup));
     const maxV = Math.max(1, ...series.flatMap((s) => s.values));
     return (
-        <div className="w-full overflow-x-auto">
-            <svg viewBox={`0 0 ${width} ${height}`} className="h-52 w-[600px]">
+        <div className="w-full">
+            <svg viewBox={`0 0 ${width} ${height}`} className="h-56 w-full sm:h-60">
+                {/* axes */}
+                <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#e5e7eb" />
+                <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="#e5e7eb" />
+                {/* grouped bars */}
                 {categories.map((_, gi) => {
                     return series.map((s, si) => {
                         const v = s.values[gi] ?? 0;
@@ -217,6 +272,38 @@ function GroupedBarChart({ categories, series }: { categories: string[]; series:
                         const y = height - padding - h;
                         return <rect key={`${gi}-${si}`} x={x} y={y} width={barW - 4} height={h} fill={s.color} rx={4} />;
                     });
+                })}
+                {/* legend */}
+                {series.map((s, i) => (
+                    <g key={`lg-${i}`}>
+                        <rect x={padding + i * 100} y={8} width={12} height={12} fill={s.color} rx={2} />
+                        <text x={padding + i * 100 + 18} y={18} fontSize={12} fill="#6b7280">
+                            {s.name}
+                        </text>
+                    </g>
+                ))}
+                {/* x labels */}
+                {categories.map((c, i) => (
+                    <text
+                        key={`xl-${i}`}
+                        x={padding + i * groupW + groupW / 2}
+                        y={height - padding + 12}
+                        fontSize={10}
+                        fill="#6b7280"
+                        textAnchor="middle"
+                    >
+                        {new Date(c).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </text>
+                ))}
+                {/* y ticks */}
+                {[0, 0.25, 0.5, 0.75, 1].map((t, i) => {
+                    const val = Math.round(maxV * t);
+                    const y = height - padding - (height - padding * 2) * t;
+                    return (
+                        <text key={`yl-${i}`} x={padding - 6} y={y} fontSize={10} fill="#6b7280" textAnchor="end">
+                            {val}
+                        </text>
+                    );
                 })}
             </svg>
         </div>
