@@ -33,11 +33,6 @@ export default function Welcome() {
                             <span className="hidden text-sm text-[#f2f2f2] opacity-75 sm:block">Available for workouts</span>
                         </div>
 
-                        <div className="text-right">
-                            <div className="text-sm font-medium text-[#f2f2f2]">2:42 PM</div>
-                            <div className="text-xs text-[#f96d00]">(GMT+7)</div>
-                        </div>
-
                         {/* Desktop Navigation */}
                         <div className="hidden md:block">
                             {auth.user ? (
