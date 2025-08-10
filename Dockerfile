@@ -20,6 +20,10 @@ RUN apt-get update && apt-get install -y \
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql pdo_pgsql pdo_sqlite mbstring exif pcntl bcmath gd
 
+# Add these lines for diagnostics
+RUN echo "--- Checking PHP Modules ---" && php -m
+RUN echo "--- Checking PHP Config Directory ---" && ls -l /usr/local/etc/php/conf.d/
+
 # Install Node.js 20.x
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
