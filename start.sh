@@ -51,6 +51,11 @@ echo "Running database migrations..."
 php artisan migrate --force
 echo "Migrations completed successfully"
 
+# Seed the database with workout templates (temporary)
+echo "Seeding workout templates..."
+php artisan db:seed --class=WorkoutTemplateSeeder --force
+echo "Seeding completed."
+
 # Create storage directories if they don't exist
 echo "Ensuring storage directories exist..."
 mkdir -p /app/storage/logs
